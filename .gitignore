@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vídeos originais (pesados, 4K) — o site usa as versões comprimidas em public/videos
+Passo a Passo/

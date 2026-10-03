@@ -1639,3 +1639,54 @@ ul, ol { list-style: none; }
   color: #0d1117;
   flex-shrink: 0;
 }
+
+/* ===== MANUAL — vídeo do passo a passo ===== */
+.manual-step-actions {
+  margin-top: var(--space-md);
+}
+
+.manual-video-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-full);
+  background: var(--accent-blue-dim);
+  border: 1px solid var(--accent-blue);
+  color: var(--accent-blue);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  transition: var(--transition-fast);
+}
+
+.manual-video-btn:hover:not(:disabled) {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.manual-video-btn.is-pending,
+.manual-video-btn:disabled {
+  background: transparent;
+  border-color: var(--border-color);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+  font-weight: 500;
+}
+
+/* Player para vídeos verticais (celular) */
+.manual-video-modal {
+  max-width: 560px;
+}
+
+.manual-video-modal .video-modal-player {
+  aspect-ratio: auto;
+  display: flex;
+  justify-content: center;
+  background: #000;
+}
+
+.manual-video-modal video {
+  display: block;
+  max-width: 100%;
+  max-height: 72vh;
+}

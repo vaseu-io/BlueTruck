@@ -131,6 +131,13 @@ function renderManualContent() {
               <span class="manual-step-number">Passo ${i + 1}</span>
             </div>
             ${step.description ? `<p class="manual-step-desc">${step.description}</p>` : ''}
+            <div class="manual-step-actions">
+              ${step.video ? `
+                <button class="manual-video-btn" data-video-step="${step.id}">▶ Ver vídeo do passo a passo</button>
+              ` : `
+                <button class="manual-video-btn is-pending" disabled title="O vídeo deste passo ainda não foi enviado">🎬 Vídeo em breve</button>
+              `}
+            </div>
             ${step.warning ? `
               <div class="manual-step-warning">
                 ⚠️ ${step.warning}
@@ -177,6 +184,15 @@ function renderManualContent() {
     });
   });
 
+  // Botão de vídeo (não marca/desmarca o passo)
+  contentEl.querySelectorAll('[data-video-step]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const found = steps.find(s => s.id === btn.dataset.videoStep);
+      if (found) openStepVideo(found);
+    });
+  });
+
   // Also allow clicking the whole step row
   contentEl.querySelectorAll('.manual-step').forEach(stepEl => {
     stepEl.addEventListener('click', () => {
@@ -213,4 +229,41 @@ function setupModeToggle() {
       renderManualContent();
     });
   });
+}
+
+function openStepVideo(step) {
+  closeStepVideo();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'video-modal-overlay';
+  overlay.id = 'step-video-modal';
+  overlay.innerHTML = `
+    <button class="video-modal-close" id="step-video-close">✕</button>
+    <div class="video-modal manual-video-modal">
+      <div class="video-modal-player">
+        <video src="${step.video}" controls autoplay playsinline preload="metadata"></video>
+      </div>
+      <div class="video-modal-info">
+        <h2 class="video-modal-title">${step.icon} ${step.title}</h2>
+        ${step.group ? `<p class="video-modal-desc">${step.group}</p>` : ''}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  overlay._onKey = (e) => { if (e.key === 'Escape') closeStepVideo(); };
+  document.addEventListener('keydown', overlay._onKey);
+
+  document.getElementById('step-video-close')?.addEventListener('click', closeStepVideo);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeStepVideo();
+  });
+}
+
+function closeStepVideo() {
+  const modal = document.getElementById('step-video-modal');
+  if (!modal) return;
+  modal.querySelector('video')?.pause();
+  if (modal._onKey) document.removeEventListener('keydown', modal._onKey);
+  modal.remove();
 }
