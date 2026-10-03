@@ -56,6 +56,14 @@ export class Scene3D {
     this.controls.maxPolarAngle = Math.PI / 2 - 0.01; // Não deixa ir pra debaixo da terra
     this.controls.target.set(0, 1.5, 0);
 
+    // Não prender a rolagem da página: a roda só dá zoom com Ctrl/⌘ e,
+    // no toque, o arrasto vertical continua rolando a página
+    const canvasEl = this.renderer.domElement;
+    canvasEl.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey && !e.metaKey) e.stopImmediatePropagation();
+    }, { capture: true });
+    canvasEl.style.touchAction = 'pan-y';
+
     // Lighting
     this.setupLighting();
 

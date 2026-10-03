@@ -36,8 +36,8 @@ router.onRouteChange = (route) => {
   // Update navbar active state
   updateActiveNav(route);
 
-  // Scroll to top smoothly
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Volta ao topo na hora (rolagem suave aqui faz a nova página "deslizar")
+  window.scrollTo({ top: 0, behavior: 'instant' });
 };
 
 // Register Routes

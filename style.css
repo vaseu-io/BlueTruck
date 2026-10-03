@@ -1384,12 +1384,12 @@ ul, ol { list-style: none; }
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-color);
   overflow: hidden;
-  min-height: 600px;
+  min-height: 680px;
 }
 
 .plant-canvas-container {
   width: 100%;
-  height: 600px;
+  height: 680px;
   position: relative;
   overflow: hidden;
   cursor: grab;
@@ -1608,4 +1608,34 @@ ul, ol { list-style: none; }
   .container {
     padding: 0 var(--space-md);
   }
+}
+
+/* ===== PLANT LEGEND (numbered items) ===== */
+.plant-legend-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-lg);
+}
+
+.plant-legend-group h5 {
+  font-size: var(--font-sm);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.plant-legend-group .plant-legend-item {
+  margin-bottom: 6px;
+}
+
+.plant-legend-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0d1117;
+  flex-shrink: 0;
 }

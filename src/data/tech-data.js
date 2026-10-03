@@ -1,43 +1,72 @@
+// Dados técnicos conferidos com os documentos oficiais (public/docs):
+//  PE   = PE -15741-R00.pdf (projeto/layout)
+//  CL   = CHECK LIST MALERO.pdf
+//  PC1/2 = Planilhas de Carga 1 e 2 (QD01 / QD02)
+//  QD01 / Entrada 1 e 2 = diagramas unifilares
+// Só entram aqui informações que constam nesses documentos.
+
+const pdf = (label, file) => ({
+  label,
+  value: `<a href="/docs/${file}" target="_blank" class="download-link">Baixar PDF</a>`
+});
+
 export const techSpecs = {
   carreta: {
-    title: 'Carreta (Semi-reboque)',
+    title: 'Carreta (Semirreboque)',
     icon: '🚛',
     color: '#FF6B35',
     specs: [
-      { label: 'Tipo', value: 'Semi-reboque Baú Especial' },
-      { label: 'Comprimento Total', value: '14.80 m' },
-      { label: 'Largura', value: '2.60 m' },
-      { label: 'Altura', value: '4.40 m' },
-      { label: 'Tara', value: '8.500 kg' },
-      { label: 'PBT (Peso Bruto Total)', value: '18.000 kg' },
-      { label: 'Eixos', value: '3 eixos com suspensão pneumática' },
-      { label: 'Pneus', value: '275/80 R22.5 (12 unidades)' },
-      { label: 'Material do Baú', value: 'Alumínio reforçado com isolamento térmico' },
-      { label: 'Piso', value: 'Anti-derrapante com reforço estrutural' },
-      { label: 'Isolamento', value: 'Poliuretano expandido 80mm' },
-      { label: 'Portas', value: '1 porta lateral + 1 porta traseira' },
-      { label: 'Estabilizadores', value: '4 macacos hidráulicos' },
-      { label: 'Blindagem', value: 'Chumbo 2mm (sala do tomógrafo)' }
+      { label: 'Tipo', value: 'Semirreboque — Tomografia / USG' },
+      { label: 'Comprimento Total', value: '15,00 m (15.000 mm)' },
+      { label: 'Largura', value: '2,60 m' },
+      { label: 'Altura', value: '≈ 4,25 m (baú 2.900 mm + 1.349 mm até o solo)' },
+      { label: 'Pneus', value: '295/80 R22,5 radiais sem câmara — 8 unidades + 1 estepe' },
+      { label: 'Rodas', value: 'Aço forjado 8,25 x 22,5" — 8 unidades' },
+      { label: 'Revestimento Interno', value: 'Paredes em ACM branco 4 mm; forro em MDF branco' },
+      { label: 'Piso', value: 'Vinílico Tarkett Cliff Oak Natural sobre compensado; base em chapa de aço 3 mm' },
+      { label: 'Blindagem', value: 'Lençol de chumbo 3,0 mm + blindagem de radiofrequência (sala do tomógrafo)' },
+      { label: 'Acessibilidade', value: 'Plataforma elevatória One Arm (PCD) e plataforma para maca' },
+      { label: 'Toldo', value: 'Articulado, lona PVC 3,00 x 2,50 m' },
+      { label: 'Janela do Banheiro', value: 'Basculante 1200 x 600 mm' },
+      { label: 'Extintores', value: 'Água 10 L (2 un.) e CO₂ 6 kg (2 un.)' }
     ]
   },
-  gerador: {
-    title: 'Gerador de Energia',
+  geradorExterno: {
+    title: 'Gerador Externo (Diesel)',
     icon: '⚡',
     color: '#FFD60A',
     specs: [
-      { label: 'Tipo', value: 'Diesel Silenciado' },
-      { label: 'Potência', value: '60 kVA' },
-      { label: 'Tensão de Saída', value: '220/380V Trifásico' },
+      { label: 'Modelo', value: 'Generac PWY65' },
+      { label: 'Potência', value: '84 kVA' },
+      { label: 'Tipo', value: 'Diesel trifásico, refrigerado a água' },
       { label: 'Frequência', value: '60 Hz' },
-      { label: 'Motor', value: 'Diesel 6 cilindros turbo' },
-      { label: 'Cilindrada', value: '6.700 cm³' },
-      { label: 'Consumo', value: '28 L/h (carga plena)' },
-      { label: 'Tanque', value: '400 litros' },
-      { label: 'Autonomia', value: '~14 horas' },
-      { label: 'Nível de Ruído', value: '72 dB(A) a 7m' },
-      { label: 'Peso', value: '2.800 kg' },
-      { label: 'Regulação de Tensão', value: '±1%' },
-      { label: 'Partida', value: 'Elétrica 24V' }
+      { label: 'Função', value: 'Fonte de energia para casos de emergência' }
+    ]
+  },
+  geradorInterno: {
+    title: 'Gerador Interno',
+    icon: '🔋',
+    color: '#FFD60A',
+    specs: [
+      { label: 'Potência', value: '60 kVA' },
+      { label: 'Uso', value: 'Para quando a unidade é ligada na tomada (energia externa)' },
+      { label: 'Seleção da fonte', value: 'Quadros de entrada com seletor de fase automático e contatoras (gerador interno/externo)' }
+    ]
+  },
+  eletrica: {
+    title: 'Quadros Elétricos (QD01 / QD02)',
+    icon: '🎛️',
+    color: '#FF9F0A',
+    specs: [
+      { label: 'Quadro de Entrada 1 (QD01)', value: 'Transformador 35 kVA (220/380 V → 380 V) · DG1 80 A · contatoras 220 V 115 A / 380 V 80 A' },
+      { label: 'Quadro de Entrada 2 (QD02)', value: 'Transformador 70 kVA (220/380 V → 380 V) · DG1 200 A · contatoras 220 V 200 A / 380 V 150 A' },
+      { label: 'QD01 — Distribuição', value: 'Disjuntor geral 63 A · DR 63 A · 22 circuitos' },
+      { label: 'QD01 — Cabos', value: 'Entrada 4 × 16 mm² EPR · terra 16 mm²' },
+      { label: 'QD02 — Tomógrafo', value: '56 kW · 380 V 3F+N · disjuntor 125 A · DR 125 A' },
+      { label: 'QD02 — Cabos', value: 'Entrada 4 × 35 mm² EPR · terra 16 mm²' },
+      { label: 'Extensão de Entrada', value: 'QD01: 4 × 25 mm² EPR, 40 m, camlock 150 A · QD02: 4 × 70 mm² EPR, 40 m, camlock 400 A' },
+      { label: 'Cabo de Energia (Check List)', value: 'Trifásico, ~25 m, plug 125 A' },
+      { label: 'Proteção', value: 'DPS (classe I e II) + DR' }
     ]
   },
   climatizacao: {
@@ -45,30 +74,12 @@ export const techSpecs = {
     icon: '❄️',
     color: '#5AC8FA',
     specs: [
-      { label: 'Tipo', value: 'Casset e Hi-Wall' },
-      { label: 'Capacidade', value: '36.000 BTU (Casset), 9k/12k BTU (Hi-Wall)' },
-      { label: 'Gás Refrigerante', value: 'R-410A' },
-      { label: 'Faixa de Temperatura', value: '16°C - 30°C' },
-      { label: 'Alimentação', value: '220V / 60Hz' },
-      { label: 'Potência', value: '5.200 W' },
-      { label: 'Filtros', value: 'HEPA + Carvão ativado' },
-      { label: 'Vazão de Ar', value: '1.800 m³/h' }
-    ]
-  },
-  hidraulica: {
-    title: 'Sistema Hidráulico',
-    icon: '💧',
-    color: '#30D158',
-    specs: [
-      { label: 'Bomba', value: 'Engrenagens 12 cm³/rot' },
-      { label: 'Pressão de Trabalho', value: '200 bar' },
-      { label: 'Reservatório', value: '40 litros' },
-      { label: 'Fluido', value: 'ISO VG 46' },
-      { label: 'Estabilizadores', value: '4x macaco hidráulico' },
-      { label: 'Curso dos Macacos', value: '600 mm' },
-      { label: 'Capacidade por Macaco', value: '12 toneladas' },
-      { label: 'Acionamento', value: 'Elétrico 24V + Controle remoto' },
-      { label: 'Nível Digital', value: 'Precisão 0.1°' }
+      { label: 'Tipo', value: 'Split inverter LG — cassete e Hi-Wall' },
+      { label: 'Cassete 36.000 BTU', value: '2 aparelhos (recepção / tomógrafo) · 3.770 W cada · disjuntor 25 A' },
+      { label: 'Hi-Wall 12.000 BTU', value: '1 aparelho (tomógrafo) · 2.240 W · disjuntor 20 A' },
+      { label: 'Hi-Wall 9.000 BTU', value: '1 aparelho (comando) · 1.500 W · disjuntor 20 A' },
+      { label: 'Potência Total (4 aparelhos)', value: '11.280 W' },
+      { label: 'Alimentação', value: '220 V monofásico / 60 Hz' }
     ]
   },
   documentos: {
@@ -76,11 +87,13 @@ export const techSpecs = {
     icon: '📄',
     color: '#8E8E93',
     specs: [
-      { label: 'Diagrama Geral de Entrada 1', value: '<a href="/docs/BLUE_HEALTH Diagrama Geral de Entrada 1.pdf" target="_blank" class="download-link">Baixar PDF</a>' },
-      { label: 'Diagrama Geral de Entrada 2', value: '<a href="/docs/BLUE_HEALTH Diagrama Geral de Entrada 2.pdf" target="_blank" class="download-link">Baixar PDF</a>' },
-      { label: 'Check List Malero', value: '<a href="/docs/CHECK LIST MALERO.pdf" target="_blank" class="download-link">Baixar PDF</a>' },
-      { label: 'Planilha de Carga 1', value: '<a href="/docs/PLANILHA DE CARGA 1 - BLUE HEALTH_REV.pdf" target="_blank" class="download-link">Baixar PDF</a>' },
-      { label: 'Planilha de Carga 2', value: '<a href="/docs/PLANILHA DE CARGA 2 - BLUE HEALTH_REV.pdf" target="_blank" class="download-link">Baixar PDF</a>' }
+      pdf('Projeto PE — Layout e Vistas', 'PE -15741-R00.pdf'),
+      pdf('Diagrama QD01 (22 circuitos)', 'Diagramas-BLUE_HEALTH QD01.pdf'),
+      pdf('Diagrama Geral de Entrada 1', 'BLUE_HEALTH Diagrama Geral de Entrada 1.pdf'),
+      pdf('Diagrama Geral de Entrada 2', 'BLUE_HEALTH Diagrama Geral de Entrada 2.pdf'),
+      pdf('Planilha de Carga 1', 'PLANILHA DE CARGA 1 - BLUE HEALTH_REV.pdf'),
+      pdf('Planilha de Carga 2', 'PLANILHA DE CARGA 2 - BLUE HEALTH_REV.pdf'),
+      pdf('Check List Maleiro', 'CHECK LIST MALERO.pdf')
     ]
   }
 };
@@ -88,58 +101,44 @@ export const techSpecs = {
 export const hotspotData = [
   {
     id: 'gerador',
-    name: 'Gerador 60 kVA',
-    description: 'Gerador diesel silenciado para alimentação independente de toda a unidade.',
+    name: 'Geradores (84 kVA externo / 60 kVA interno)',
+    description: 'Gerador externo diesel de 84 kVA (Generac PWY65) e gerador interno de 60 kVA, usado quando a unidade é ligada na tomada.',
     position: { x: -6.5, y: 1.5, z: 0 },
     color: '#FFD60A',
-    specs: techSpecs.gerador.specs.slice(0, 6),
-    status: 'Operacional',
+    specs: [
+      { label: 'Externo', value: 'Generac PWY65 · 84 kVA · diesel' },
+      { label: 'Externo — Rede', value: 'Trifásico · 60 Hz' },
+      { label: 'Interno', value: '60 kVA' },
+      { label: 'Uso do interno', value: 'Ligado na tomada' }
+    ],
     manualLink: 'eletrica'
   },
   {
     id: 'painel',
-    name: 'Painel de Controle',
-    description: 'QDG - Quadro de Distribuição Geral com todos os disjuntores e medidores.',
+    name: 'Quadros Elétricos (QD01 / QD02)',
+    description: 'QD01 distribui a energia da unidade em 22 circuitos; o QD02 alimenta o tomógrafo.',
     position: { x: 0, y: 2.0, z: -1.3 }, // Inside command area
     color: '#FF6B35',
     specs: [
-      { label: 'Tipo', value: 'QDG / QDF (Baixa Tensão)' },
-      { label: 'Disjuntor Geral', value: '63A' },
-      { label: 'Disjuntores', value: '22 circuitos' },
-      { label: 'Medição', value: 'V, A, Hz, kW, cos φ' },
+      { label: 'QD01 — Disjuntor Geral', value: '63 A' },
+      { label: 'QD01 — Circuitos', value: '22' },
+      { label: 'QD02 — Tomógrafo', value: '56 kW · 125 A · 380 V' },
       { label: 'Proteção', value: 'DR + DPS' }
     ],
-    status: 'Operacional',
     manualLink: 'eletrica'
-  },
-  {
-    id: 'estabilizador-d',
-    name: 'Estabilizadores Dianteiros (Patolas)',
-    description: 'Macacos hidráulicos para nivelamento e estabilização da carreta.',
-    position: { x: -5, y: 0.5, z: 1.5 },
-    color: '#30D158',
-    specs: techSpecs.hidraulica.specs.slice(4, 8),
-    status: 'Operacional',
-    manualLink: 'hidraulica'
-  },
-  {
-    id: 'estabilizador-t',
-    name: 'Estabilizadores Traseiros (Patolas)',
-    description: 'Macacos hidráulicos traseiros para suporte e nivelamento.',
-    position: { x: 5, y: 0.5, z: 1.5 },
-    color: '#30D158',
-    specs: techSpecs.hidraulica.specs.slice(4, 8),
-    status: 'Operacional',
-    manualLink: 'hidraulica'
   },
   {
     id: 'climatizacao',
     name: 'Ar-condicionado',
-    description: 'Sistema de climatização para manter temperatura ideal do tomógrafo.',
+    description: 'Quatro aparelhos split inverter LG: dois cassetes de 36.000 BTU e dois Hi-Wall de 12.000 e 9.000 BTU.',
     position: { x: 0, y: 4.2, z: 0 },
     color: '#5AC8FA',
-    specs: techSpecs.climatizacao.specs.slice(0, 5),
-    status: 'Operacional',
+    specs: [
+      { label: 'Cassete', value: '2 × 36.000 BTU' },
+      { label: 'Hi-Wall', value: '12.000 e 9.000 BTU' },
+      { label: 'Potência Total', value: '11.280 W' },
+      { label: 'Alimentação', value: '220 V / 60 Hz' }
+    ],
     manualLink: 'eletrica'
   }
 ];

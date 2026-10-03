@@ -41,10 +41,6 @@ export function renderHome(container, router) {
                 <h3 class="detail-panel-title" id="detail-title"></h3>
                 <button class="detail-panel-close" id="detail-close">✕</button>
               </div>
-              <div class="detail-panel-status">
-                <span class="dot"></span>
-                <span id="detail-status"></span>
-              </div>
               <p class="detail-panel-desc" id="detail-desc"></p>
               <div class="detail-panel-specs" id="detail-specs"></div>
               <button class="detail-panel-link" id="detail-manual-link">
@@ -57,20 +53,20 @@ export function renderHome(container, router) {
         <!-- Stats -->
         <div class="stats-bar">
           <div class="stat-item">
-            <div class="stat-value">128</div>
-            <div class="stat-label">Cortes por Rotação</div>
+            <div class="stat-value">84</div>
+            <div class="stat-label">kVA Gerador Externo (Diesel)</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">150</div>
-            <div class="stat-label">kVA Gerador</div>
+            <div class="stat-value">60</div>
+            <div class="stat-label">kVA Gerador Interno</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">18t</div>
-            <div class="stat-label">Peso Bruto Total</div>
+            <div class="stat-value">15 m</div>
+            <div class="stat-label">Comprimento Total</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">4</div>
-            <div class="stat-label">Estabilizadores</div>
+            <div class="stat-value">22</div>
+            <div class="stat-label">Circuitos no QD01</div>
           </div>
         </div>
 
@@ -87,7 +83,7 @@ export function renderHome(container, router) {
             <div class="quick-card" data-route="manual">
               <div class="quick-card-icon">📘</div>
               <h3 class="quick-card-title">Manual</h3>
-              <p class="quick-card-desc">3 etapas: Desmontagem, Elétrica e Hidráulica.</p>
+              <p class="quick-card-desc">Ativação e desligamento em 3 etapas: Montagem/Desmontagem, Hidráulica e Elétrica.</p>
             </div>
             <div class="quick-card" data-route="techinfo">
               <div class="quick-card-icon">⚙️</div>
@@ -190,7 +186,6 @@ function showDetailPanel(data, router) {
   if (!panel) return;
 
   document.getElementById('detail-title').textContent = data.name;
-  document.getElementById('detail-status').textContent = data.status;
   document.getElementById('detail-desc').textContent = data.description;
 
   const specsContainer = document.getElementById('detail-specs');

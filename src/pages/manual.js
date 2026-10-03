@@ -1,12 +1,16 @@
-import { manualStages } from '../data/manual-data.js';
+import { manualModes } from '../data/manual-data.js';
 
 let currentStage = 0;
 let currentMode = 'activation'; // 'activation' or 'shutdown'
 let checkedSteps = {};
 
+const getStages = () => manualModes[currentMode].stages;
+
 export function renderManual(container) {
   // Reset state
   checkedSteps = {};
+  currentMode = 'activation';
+  currentStage = 0;
 
   container.innerHTML = `
     <div class="page manual-page">
@@ -20,7 +24,7 @@ export function renderManual(container) {
             <span class="gradient-text">Manual de Operação</span>
           </h1>
           <p class="hero-subtitle">
-            Siga os procedimentos de ativação e desligamento da carreta em 3 etapas.
+            Siga o passo a passo oficial: Montagem, Hidráulica e Elétrica na ativação; Desmontagem, Elétrica e Hidráulica no desligamento.
           </p>
         </section>
 
@@ -63,7 +67,8 @@ function renderStepper() {
   if (!stepperEl) return;
 
   let html = '';
-  manualStages.forEach((stage, i) => {
+  const stages = getStages();
+  stages.forEach((stage, i) => {
     const isActive = i === currentStage;
     const isCompleted = i < currentStage;
 
@@ -74,7 +79,7 @@ function renderStepper() {
       </div>
     `;
 
-    if (i < manualStages.length - 1) {
+    if (i < stages.length - 1) {
       html += `<div class="stepper-line ${isCompleted ? 'completed' : ''}"></div>`;
     }
   });
@@ -95,9 +100,10 @@ function renderManualContent() {
   const contentEl = document.getElementById('manual-content');
   if (!contentEl) return;
 
-  const stage = manualStages[currentStage];
-  const modeData = currentMode === 'activation' ? stage.activation : stage.shutdown;
-  const steps = modeData.steps;
+  const stages = getStages();
+  const stage = stages[currentStage];
+  const steps = stage.steps;
+  const stageTitle = `${manualModes[currentMode].label} — ${stage.title}`;
 
   // Count checked for this stage
   const stageKey = `${currentMode}-${stage.id}`;
@@ -107,14 +113,16 @@ function renderManualContent() {
   contentEl.innerHTML = `
     <div class="manual-stage-header" style="animation: pageIn 0.4s ease;">
       <div class="manual-stage-icon" style="color: ${stage.color};">${stage.icon}</div>
-      <h2 class="manual-stage-title">${modeData.title}</h2>
+      <h2 class="manual-stage-title">${stageTitle}</h2>
       <p class="manual-stage-desc">${stage.description}</p>
     </div>
 
     <div class="manual-steps">
       ${steps.map((step, i) => {
         const isChecked = checkedSteps[`${stageKey}-${step.id}`];
+        const showGroup = step.group && step.group !== steps[i - 1]?.group;
         return `
+          ${showGroup ? `<h4 class="manual-step-group" style="margin: var(--space-lg) 0 var(--space-sm); font-size: var(--font-sm); color: ${stage.color}; text-transform: uppercase; letter-spacing: 0.05em;">${step.group}</h4>` : ''}
           <div class="manual-step ${isChecked ? 'checked' : ''}" data-step-id="${step.id}" style="animation: pageIn 0.4s ease ${i * 0.05}s both;">
             <div class="manual-step-header">
               <div class="manual-step-checkbox" data-step="${step.id}">${isChecked ? '✓' : ''}</div>
@@ -122,7 +130,7 @@ function renderManualContent() {
               <h3 class="manual-step-title">${step.title}</h3>
               <span class="manual-step-number">Passo ${i + 1}</span>
             </div>
-            <p class="manual-step-desc">${step.description}</p>
+            ${step.description ? `<p class="manual-step-desc">${step.description}</p>` : ''}
             ${step.warning ? `
               <div class="manual-step-warning">
                 ⚠️ ${step.warning}
@@ -143,10 +151,10 @@ function renderManualContent() {
       </div>
     </div>
 
-    ${currentStage < manualStages.length - 1 ? `
+    ${currentStage < stages.length - 1 ? `
       <div style="text-align: center; margin-top: var(--space-xl);">
         <button class="detail-panel-link" id="next-stage-btn" style="max-width: 300px; margin: 0 auto;">
-          Próxima Etapa: ${manualStages[currentStage + 1].title} →
+          Próxima Etapa: ${stages[currentStage + 1].title} →
         </button>
       </div>
     ` : `
@@ -181,7 +189,7 @@ function renderManualContent() {
 
   // Next stage button
   document.getElementById('next-stage-btn')?.addEventListener('click', () => {
-    if (currentStage < manualStages.length - 1) {
+    if (currentStage < getStages().length - 1) {
       currentStage++;
       renderStepper();
       renderManualContent();
@@ -200,6 +208,8 @@ function setupModeToggle() {
       btn.classList.add('active');
 
       currentMode = btn.dataset.mode;
+      currentStage = 0;
+      renderStepper();
       renderManualContent();
     });
   });
