@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 export class Scene3D {
   constructor(container) {
@@ -24,7 +25,7 @@ export class Scene3D {
   init() {
     // Scene
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x0a0e1a, 0.015);
+    this.scene.fog = new THREE.FogExp2(0x0a0e1a, 0.006);
 
     // Camera
     const aspect = this.container.clientWidth / this.container.clientHeight;
@@ -40,11 +41,13 @@ export class Scene3D {
       powerPreference: 'high-performance'
     });
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Mínimo de 1.5x: em telas comuns renderiza em maior resolução e reduz serrilhado
+    this.renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio, 1.5), 2));
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.2;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
+    // Neutral mantém as cores do material fiéis (bom para visualização de produto)
+    this.renderer.toneMapping = THREE.NeutralToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
     this.container.appendChild(this.renderer.domElement);
 
     // Controls
@@ -80,16 +83,28 @@ export class Scene3D {
   }
 
   setupLighting() {
+    // Iluminação de estúdio (reflexos e luz difusa em todos os lados)
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this.scene.environmentIntensity = 0.7;
+    pmrem.dispose();
+
     // Ambient
-    const ambient = new THREE.AmbientLight(0x4466aa, 0.6);
+    const ambient = new THREE.HemisphereLight(0xffffff, 0x556677, 0.5);
     this.scene.add(ambient);
 
+    // Luz principal: do lado da câmera (vista padrão da carreta)
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
+    keyLight.position.set(-6, 14, -14);
+    this.scene.add(keyLight);
+
     // Main directional light
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
     dirLight.position.set(10, 15, 10);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.mapSize.width = 4096;
+    dirLight.shadow.mapSize.height = 4096;
+    dirLight.shadow.normalBias = 0.03;
     dirLight.shadow.camera.near = 0.5;
     dirLight.shadow.camera.far = 50;
     dirLight.shadow.camera.left = -15;
@@ -113,8 +128,8 @@ export class Scene3D {
     // Ground plane
     const groundGeo = new THREE.PlaneGeometry(60, 60);
     const groundMat = new THREE.MeshStandardMaterial({
-      color: 0x111827,
-      roughness: 0.9,
+      color: 0x0f172a,
+      roughness: 0.95,
       metalness: 0.1,
     });
     const ground = new THREE.Mesh(groundGeo, groundMat);
