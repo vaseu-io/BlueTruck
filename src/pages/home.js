@@ -29,6 +29,12 @@ export function renderHome(container, router) {
           <p class="hero-subtitle">
             A saúde está ficando cada vez mais acessível. A BlueTruck leva tomografia e consultório até onde você precisa.
           </p>
+          <div class="hero-cta">
+            <button class="cta-button" id="cta-iniciar">
+              <span>Iniciar Ativação</span>
+              <svg class="cta-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
         </section>
 
         <!-- 3D Viewer -->
@@ -112,6 +118,11 @@ export function renderHome(container, router) {
 
   // Initialize 3D
   initScene(router);
+
+  // Chamada para ação: leva ao manual (que abre já na Ativação)
+  document.getElementById('cta-iniciar')?.addEventListener('click', () => {
+    router.navigate('manual');
+  });
 
   // Quick card navigation
   document.querySelectorAll('.quick-card').forEach(card => {

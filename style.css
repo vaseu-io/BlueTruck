@@ -2105,3 +2105,76 @@ body.gate-aberto {
   cursor: not-allowed;
   filter: grayscale(0.4);
 }
+
+/* ===== CHAMADA PARA AÇÃO (tela principal) ===== */
+.hero-cta {
+  margin-top: var(--space-lg);
+  display: flex;
+  justify-content: center;
+  animation: fadeInDown 0.6s ease 0.3s both;
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 18px 34px;
+  background: linear-gradient(135deg, var(--accent-blue), #0066CC);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-family: inherit;
+  font-size: var(--font-lg);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.55);
+  animation: ctaPulso 2.6s ease-out infinite;
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+}
+
+.cta-button:active {
+  transform: translateY(0);
+}
+
+.cta-button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.cta-seta {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.18s ease;
+}
+
+.cta-button:hover .cta-seta {
+  transform: translateX(5px);
+}
+
+@keyframes ctaPulso {
+  0% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.55); }
+  70% { box-shadow: 0 0 0 16px rgba(10, 132, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-button { animation: none; }
+}
+
+@media (max-width: 768px) {
+  .hero-cta {
+    justify-content: flex-start;
+    margin-top: var(--space-md);
+  }
+
+  .cta-button {
+    width: 100%;
+    justify-content: center;
+    padding: 16px 24px;
+  }
+}
