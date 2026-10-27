@@ -1,5 +1,17 @@
 import { manualModes } from '../data/manual-data.js';
 
+// Ícones de linha (SVG) das etapas: herdam a cor do texto
+const ICONE = (caminhos) => `<svg class="stage-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">${caminhos}</svg>`;
+const ICONES_ETAPA = {
+  montagem: ICONE('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8 6.2 21l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.8-.6-.6-2.8z"/>'),
+  desmontagem: ICONE('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8 6.2 21l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.8-.6-.6-2.8z"/>'),
+  hidraulica: ICONE('<path d="M12 3 6.5 10a7 7 0 1 0 11 0z"/>'),
+  eletrica: ICONE('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'),
+  elevador: ICONE('<circle cx="12" cy="4.5" r="1.5"/><path d="M12 8v6M7 9.5l5 1.5 5-1.5M9.5 21 12 14l2.5 7"/>'),
+};
+const ICONE_OK = ICONE('<path d="m5 12.5 4.5 4.5L19 7.5"/>');
+const iconeDaEtapa = (stage) => ICONES_ETAPA[stage.id] || stage.icon;
+
 let currentStage = 0;
 let currentMode = 'activation'; // 'activation' or 'shutdown'
 let checkedSteps = {};
@@ -77,7 +89,7 @@ function renderStepper() {
 
     html += `
       <div class="stepper-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" data-stage="${i}">
-        <div class="stepper-circle">${isCompleted ? '✓' : stage.icon}</div>
+        <div class="stepper-circle">${isCompleted ? ICONE_OK : iconeDaEtapa(stage)}</div>
         <span class="stepper-label">${stage.title}</span>
       </div>
     `;
@@ -115,7 +127,7 @@ function renderManualContent() {
 
   contentEl.innerHTML = `
     <div class="manual-stage-header" style="animation: pageIn 0.4s ease;">
-      <div class="manual-stage-icon" style="color: ${stage.color};">${stage.icon}</div>
+      <div class="manual-stage-icon" style="color: ${stage.color};">${iconeDaEtapa(stage)}</div>
       <h2 class="manual-stage-title">${stageTitle}</h2>
       <p class="manual-stage-desc">${stage.description}</p>
     </div>
@@ -148,6 +160,16 @@ function renderManualContent() {
               <div class="manual-step-actions">
                 ${getVideos(step).map((_, k, all) => `
                   <button class="manual-video-btn" data-video-step="${step.id}" data-video-index="${k}">▶ Ver vídeo${all.length > 1 ? ' ' + (k + 1) : ''} do passo a passo</button>
+                `).join('')}
+              </div>
+            ` : ''}
+            ${step.links?.length ? `
+              <div class="manual-step-actions">
+                ${step.links.map(l => `
+                  <a class="manual-link-btn" href="${l.href}" target="_blank" rel="noopener">
+                    <svg class="stage-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg>
+                    ${l.label}
+                  </a>
                 `).join('')}
               </div>
             ` : ''}
@@ -214,6 +236,11 @@ function renderManualContent() {
       const img = found?.images?.[Number(fig.dataset.photoIndex)];
       if (img) openStepPhoto(img);
     });
+  });
+
+  // Link de PDF: abre sem marcar/desmarcar o passo
+  contentEl.querySelectorAll('.manual-link-btn').forEach(a => {
+    a.addEventListener('click', (e) => e.stopPropagation());
   });
 
   // Also allow clicking the whole step row

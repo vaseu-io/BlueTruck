@@ -1688,28 +1688,13 @@ ul, ol { list-style: none; }
     margin-bottom: var(--space-xs);
   }
 
-  /* Tela principal no celular: a frase tem a largura exata de "BlueTruck",
-     então o ! fica embaixo do k. Sem o texto de apoio. */
-  .home-hero .hero-title {
-    display: inline-block;
-  }
-
+  /* Tela principal no celular: frase em texto natural abaixo da marca; sem o texto de apoio */
   .home-hero .hero-tagline {
     display: block;
-    width: 0;
-    min-width: 100%;
-    /* ~0,475 do tamanho de "BlueTruck": a 1ª linha cabe na largura da marca */
-    font-size: clamp(1.425rem, 7.6vw, 2rem);
+    font-size: clamp(1.4rem, 7vw, 1.9rem);
     font-weight: 700;
-    line-height: 1.15;
+    line-height: 1.2;
     letter-spacing: -0.5px;
-  }
-
-  .home-hero .tagline-line {
-    display: block;
-    white-space: nowrap;
-    text-align: justify;
-    text-align-last: justify;
   }
 
   .home-hero .hero-subtitle {
@@ -1763,16 +1748,37 @@ ul, ol { list-style: none; }
     grid-template-columns: 1fr;
   }
 
+  /* Etapas lado a lado (como no computador), mais compactas */
   .stepper {
-    flex-direction: column;
-    gap: var(--space-sm);
+    padding: 0;
+    align-items: flex-start;
+    margin-bottom: var(--space-xl);
+  }
+
+  .stepper-step {
+    min-width: 0;
+    flex: 0 0 auto;
+    width: 74px;
+    gap: var(--space-xs);
+  }
+
+  .stepper-circle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .stepper-label {
+    font-size: 0.6rem;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
   }
 
   .stepper-line {
-    width: 2px;
-    height: 30px;
-    min-width: 2px;
-    margin: 0;
+    flex: 1;
+    height: 2px;
+    min-width: 6px;
+    margin: 21px 0 0;
   }
 
   .stats-bar {
@@ -2022,4 +2028,41 @@ body.gate-aberto {
 @keyframes gateTremer {
   20%, 60% { transform: translateX(-8px); }
   40%, 80% { transform: translateX(8px); }
+}
+
+/* Ícones de linha (SVG) das etapas do manual */
+.stage-svg {
+  width: 26px;
+  height: 26px;
+}
+
+.manual-stage-icon .stage-svg {
+  width: 56px;
+  height: 56px;
+}
+
+/* Botão que abre um PDF (checklist) */
+.manual-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-full);
+  background: var(--accent-blue-dim);
+  border: 1px solid var(--accent-blue);
+  color: var(--accent-blue);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.manual-link-btn:hover {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.manual-link-btn .stage-svg {
+  width: 18px;
+  height: 18px;
 }

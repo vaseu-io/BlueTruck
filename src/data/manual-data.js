@@ -214,7 +214,10 @@ export const manualModes = {
         description: 'Remoção de dejetos e conferência do maleiro.',
         steps: [
           step('dh-dejetos', 'Remover dejetos e água suja', '', { icon: '🚰' }),
-          step('dh-checklist', 'Conferir itens do maleiro no checklist', '', { icon: '✅' }),
+          step('dh-checklist', 'Conferir itens do maleiro no checklist', '', {
+            icon: '✅',
+            links: [{ label: 'Abrir o checklist do maleiro (PDF)', href: asset('docs/CHECK LIST MALERO.pdf') }]
+          }),
         ]
       },
       elevadorAcessibilidade
