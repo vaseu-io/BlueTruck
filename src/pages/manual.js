@@ -21,6 +21,43 @@ const getStages = () => manualModes[currentMode].stages;
 // Um passo pode ter um vídeo (video) ou vários, na ordem em que devem ser vistos (videos)
 const getVideos = (step) => step.videos || (step.video ? [step.video] : []);
 
+// Só dá para avançar de etapa depois de marcar todos os passos obrigatórios da etapa atual.
+// Passos com opcional: true não travam. Voltar para uma etapa anterior é sempre permitido.
+const passoObrigatorio = (step) => !step.opcional;
+const chaveDoPasso = (stage, step) => `${currentMode}-${stage.id}-${step.id}`;
+
+function etapaConcluida(i) {
+  const stage = getStages()[i];
+  return stage.steps.filter(passoObrigatorio).every(s => checkedSteps[chaveDoPasso(stage, s)]);
+}
+
+function primeiraEtapaPendente() {
+  const n = getStages().findIndex((_, i) => !etapaConcluida(i));
+  return n === -1 ? getStages().length : n;
+}
+
+const podeIrPara = (i) => i <= primeiraEtapaPendente();
+
+let avisoTimer = null;
+function avisar(texto) {
+  const el = document.getElementById('manual-aviso');
+  if (!el) return;
+  el.textContent = texto;
+  el.hidden = false;
+  el.classList.remove('manual-aviso-pulsa');
+  void el.offsetWidth; // reinicia a animação
+  el.classList.add('manual-aviso-pulsa');
+  clearTimeout(avisoTimer);
+  avisoTimer = setTimeout(() => { el.hidden = true; }, 4500);
+}
+
+function aposMarcar() {
+  // Se desmarcou algo de uma etapa anterior, volta para a etapa que ficou pendente
+  if (!podeIrPara(currentStage)) currentStage = primeiraEtapaPendente();
+  renderStepper();
+  renderManualContent();
+}
+
 export function renderManual(container) {
   // Reset state
   checkedSteps = {};
@@ -58,6 +95,7 @@ export function renderManual(container) {
         <!-- Stepper -->
         <div class="stepper" id="stepper">
         </div>
+        <p class="manual-aviso" id="manual-aviso" role="alert" hidden></p>
 
         <!-- Manual Content -->
         <div class="manual-content" id="manual-content">
@@ -85,10 +123,11 @@ function renderStepper() {
   const stages = getStages();
   stages.forEach((stage, i) => {
     const isActive = i === currentStage;
-    const isCompleted = i < currentStage;
+    const isCompleted = etapaConcluida(i);
+    const isLocked = !podeIrPara(i);
 
     html += `
-      <div class="stepper-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" data-stage="${i}">
+      <div class="stepper-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}" data-stage="${i}" aria-disabled="${isLocked}">
         <div class="stepper-circle">${isCompleted ? ICONE_OK : iconeDaEtapa(stage)}</div>
         <span class="stepper-label">${stage.title}</span>
       </div>
@@ -104,7 +143,13 @@ function renderStepper() {
   // Click handlers
   stepperEl.querySelectorAll('.stepper-step').forEach(step => {
     step.addEventListener('click', () => {
-      currentStage = parseInt(step.dataset.stage);
+      const destino = parseInt(step.dataset.stage);
+      if (!podeIrPara(destino)) {
+        const pendente = getStages()[primeiraEtapaPendente()];
+        avisar(`Marque todos os passos de "${pendente.title}" antes de ir para outra etapa.`);
+        return;
+      }
+      currentStage = destino;
       renderStepper();
       renderManualContent();
     });
@@ -118,20 +163,16 @@ function renderManualContent() {
   const stages = getStages();
   const stage = stages[currentStage];
   const steps = stage.steps;
-  const stageTitle = `${manualModes[currentMode].label} — ${stage.title}`;
 
-  // Count checked for this stage
+  // Progresso da etapa: só os passos obrigatórios contam
   const stageKey = `${currentMode}-${stage.id}`;
-  const checkedCount = steps.filter(s => checkedSteps[`${stageKey}-${s.id}`]).length;
-  const progress = Math.round((checkedCount / steps.length) * 100);
+  const obrigatorios = steps.filter(passoObrigatorio);
+  const checkedCount = obrigatorios.filter(s => checkedSteps[`${stageKey}-${s.id}`]).length;
+  const progress = Math.round((checkedCount / obrigatorios.length) * 100);
+  const concluida = checkedCount === obrigatorios.length;
+  const faltam = obrigatorios.length - checkedCount;
 
   contentEl.innerHTML = `
-    <div class="manual-stage-header" style="animation: pageIn 0.4s ease;">
-      <div class="manual-stage-icon" style="color: ${stage.color};">${iconeDaEtapa(stage)}</div>
-      <h2 class="manual-stage-title">${stageTitle}</h2>
-      <p class="manual-stage-desc">${stage.description}</p>
-    </div>
-
     <div class="manual-steps">
       ${steps.map((step, i) => {
         const isChecked = checkedSteps[`${stageKey}-${step.id}`];
@@ -186,7 +227,7 @@ function renderManualContent() {
     <div class="manual-progress">
       <div class="manual-progress-header">
         <span class="manual-progress-label">Progresso da Etapa</span>
-        <span class="manual-progress-value">${checkedCount}/${steps.length} (${progress}%)</span>
+        <span class="manual-progress-value">${checkedCount}/${obrigatorios.length} (${progress}%)</span>
       </div>
       <div class="manual-progress-bar">
         <div class="manual-progress-fill" style="width: ${progress}%;"></div>
@@ -195,15 +236,17 @@ function renderManualContent() {
 
     ${currentStage < stages.length - 1 ? `
       <div style="text-align: center; margin-top: var(--space-xl);">
-        <button class="detail-panel-link" id="next-stage-btn" style="max-width: 300px; margin: 0 auto;">
+        <button class="detail-panel-link" id="next-stage-btn" style="max-width: 300px; margin: 0 auto;" ${concluida ? '' : 'disabled'}>
           Próxima Etapa: ${stages[currentStage + 1].title} →
         </button>
+        ${concluida ? '' : `<p class="manual-bloqueio">Faltam ${faltam} ${faltam === 1 ? 'passo' : 'passos'} para liberar a próxima etapa.</p>`}
       </div>
     ` : `
       <div style="text-align: center; margin-top: var(--space-xl);">
-        <button class="detail-panel-link" id="finish-btn" style="max-width: 300px; margin: 0 auto; background: linear-gradient(135deg, var(--accent-green), #1a9940);">
+        <button class="detail-panel-link" id="finish-btn" style="max-width: 300px; margin: 0 auto; background: linear-gradient(135deg, var(--accent-green), #1a9940);" ${concluida ? '' : 'disabled'}>
           ✅ Procedimento Completo
         </button>
+        ${concluida ? '' : `<p class="manual-bloqueio">Faltam ${faltam} ${faltam === 1 ? 'passo' : 'passos'} para concluir.</p>`}
       </div>
     `}
   `;
@@ -215,7 +258,7 @@ function renderManualContent() {
       const stepId = checkbox.dataset.step;
       const key = `${stageKey}-${stepId}`;
       checkedSteps[key] = !checkedSteps[key];
-      renderManualContent();
+      aposMarcar();
     });
   });
 
@@ -249,13 +292,13 @@ function renderManualContent() {
       const stepId = stepEl.dataset.stepId;
       const key = `${stageKey}-${stepId}`;
       checkedSteps[key] = !checkedSteps[key];
-      renderManualContent();
+      aposMarcar();
     });
   });
 
   // Next stage button
   document.getElementById('next-stage-btn')?.addEventListener('click', () => {
-    if (currentStage < getStages().length - 1) {
+    if (concluida && currentStage < getStages().length - 1) {
       currentStage++;
       renderStepper();
       renderManualContent();

@@ -132,7 +132,7 @@ export const manualModes = {
             { icon: '🔌' }),
           step('me-gerador', 'Como utilizar o gerador (opcional)',
             'Etapa opcional: siga o vídeo para utilizar o gerador.',
-            { icon: '⚡', video: vid('como-utilizar-gerador') }),
+            { icon: '⚡', video: vid('como-utilizar-gerador'), opcional: true }),
           step('me-qdf-ext', 'Ligar QDF externo', '', {
             icon: '🎛️',
             video: vid('quadro-de-forca'),
