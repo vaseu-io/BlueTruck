@@ -144,15 +144,13 @@ function renderManualContent() {
                 `).join('')}
               </div>
             ` : ''}
-            ${step.noVideo && !getVideos(step).length ? '' : `
+            ${getVideos(step).length ? `
               <div class="manual-step-actions">
-                ${getVideos(step).length ? getVideos(step).map((_, k, all) => `
+                ${getVideos(step).map((_, k, all) => `
                   <button class="manual-video-btn" data-video-step="${step.id}" data-video-index="${k}">▶ Ver vídeo${all.length > 1 ? ' ' + (k + 1) : ''} do passo a passo</button>
-                `).join('') : `
-                  <button class="manual-video-btn is-pending" disabled title="O vídeo deste passo ainda não foi enviado">🎬 Vídeo em breve</button>
-                `}
+                `).join('')}
               </div>
-            `}
+            ` : ''}
             ${step.warning ? `
               <div class="manual-step-warning">
                 ⚠️ ${step.warning}
