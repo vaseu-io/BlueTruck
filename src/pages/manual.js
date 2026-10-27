@@ -131,13 +131,25 @@ function renderManualContent() {
               <span class="manual-step-number">Passo ${i + 1}</span>
             </div>
             ${step.description ? `<p class="manual-step-desc">${step.description}</p>` : ''}
-            <div class="manual-step-actions">
-              ${step.video ? `
-                <button class="manual-video-btn" data-video-step="${step.id}">▶ Ver vídeo do passo a passo</button>
-              ` : `
-                <button class="manual-video-btn is-pending" disabled title="O vídeo deste passo ainda não foi enviado">🎬 Vídeo em breve</button>
-              `}
-            </div>
+            ${step.images ? `
+              <div class="manual-step-images">
+                ${step.images.map((img, k) => `
+                  <figure class="manual-step-photo" data-photo-step="${step.id}" data-photo-index="${k}">
+                    <img src="${img.src}" alt="${img.caption}" loading="lazy">
+                    <figcaption>${img.caption}</figcaption>
+                  </figure>
+                `).join('')}
+              </div>
+            ` : ''}
+            ${step.noVideo && !step.video ? '' : `
+              <div class="manual-step-actions">
+                ${step.video ? `
+                  <button class="manual-video-btn" data-video-step="${step.id}">▶ Ver vídeo do passo a passo</button>
+                ` : `
+                  <button class="manual-video-btn is-pending" disabled title="O vídeo deste passo ainda não foi enviado">🎬 Vídeo em breve</button>
+                `}
+              </div>
+            `}
             ${step.warning ? `
               <div class="manual-step-warning">
                 ⚠️ ${step.warning}
@@ -190,6 +202,16 @@ function renderManualContent() {
       e.stopPropagation();
       const found = steps.find(s => s.id === btn.dataset.videoStep);
       if (found) openStepVideo(found);
+    });
+  });
+
+  // Fotos de apoio: clique amplia
+  contentEl.querySelectorAll('[data-photo-step]').forEach(fig => {
+    fig.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const found = steps.find(s => s.id === fig.dataset.photoStep);
+      const img = found?.images?.[Number(fig.dataset.photoIndex)];
+      if (img) openStepPhoto(img);
     });
   });
 
@@ -266,4 +288,31 @@ function closeStepVideo() {
   modal.querySelector('video')?.pause();
   if (modal._onKey) document.removeEventListener('keydown', modal._onKey);
   modal.remove();
+}
+
+function openStepPhoto(img) {
+  closeStepVideo();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'video-modal-overlay';
+  overlay.id = 'step-video-modal';
+  overlay.innerHTML = `
+    <button class="video-modal-close" id="step-video-close">✕</button>
+    <div class="video-modal manual-video-modal">
+      <div class="video-modal-player">
+        <img src="${img.src}" alt="${img.caption}" class="manual-photo-full">
+      </div>
+      <div class="video-modal-info">
+        <h2 class="video-modal-title">${img.caption}</h2>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  overlay._onKey = (e) => { if (e.key === 'Escape') closeStepVideo(); };
+  document.addEventListener('keydown', overlay._onKey);
+  document.getElementById('step-video-close')?.addEventListener('click', closeStepVideo);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeStepVideo();
+  });
 }

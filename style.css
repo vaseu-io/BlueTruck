@@ -1690,3 +1690,46 @@ ul, ol { list-style: none; }
   max-width: 100%;
   max-height: 72vh;
 }
+
+/* Fotos de apoio dos passos */
+.manual-step-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.manual-step-photo {
+  margin: 0;
+  width: 160px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  cursor: zoom-in;
+  transition: var(--transition-fast);
+}
+
+.manual-step-photo:hover {
+  border-color: var(--accent-blue);
+}
+
+.manual-step-photo img {
+  display: block;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.manual-step-photo figcaption {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-xs, 0.75rem);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.manual-photo-full {
+  display: block;
+  max-width: 100%;
+  max-height: 72vh;
+}
