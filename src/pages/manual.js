@@ -6,6 +6,9 @@ let checkedSteps = {};
 
 const getStages = () => manualModes[currentMode].stages;
 
+// Um passo pode ter um vídeo (video) ou vários, na ordem em que devem ser vistos (videos)
+const getVideos = (step) => step.videos || (step.video ? [step.video] : []);
+
 export function renderManual(container) {
   // Reset state
   checkedSteps = {};
@@ -141,11 +144,11 @@ function renderManualContent() {
                 `).join('')}
               </div>
             ` : ''}
-            ${step.noVideo && !step.video ? '' : `
+            ${step.noVideo && !getVideos(step).length ? '' : `
               <div class="manual-step-actions">
-                ${step.video ? `
-                  <button class="manual-video-btn" data-video-step="${step.id}">▶ Ver vídeo do passo a passo</button>
-                ` : `
+                ${getVideos(step).length ? getVideos(step).map((_, k, all) => `
+                  <button class="manual-video-btn" data-video-step="${step.id}" data-video-index="${k}">▶ Ver vídeo${all.length > 1 ? ' ' + (k + 1) : ''} do passo a passo</button>
+                `).join('') : `
                   <button class="manual-video-btn is-pending" disabled title="O vídeo deste passo ainda não foi enviado">🎬 Vídeo em breve</button>
                 `}
               </div>
@@ -201,7 +204,7 @@ function renderManualContent() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const found = steps.find(s => s.id === btn.dataset.videoStep);
-      if (found) openStepVideo(found);
+      if (found) openStepVideo(found, Number(btn.dataset.videoIndex || 0));
     });
   });
 
@@ -253,8 +256,9 @@ function setupModeToggle() {
   });
 }
 
-function openStepVideo(step) {
+function openStepVideo(step, index = 0) {
   closeStepVideo();
+  const videos = getVideos(step);
 
   const overlay = document.createElement('div');
   overlay.className = 'video-modal-overlay';
@@ -263,11 +267,12 @@ function openStepVideo(step) {
     <button class="video-modal-close" id="step-video-close">✕</button>
     <div class="video-modal manual-video-modal">
       <div class="video-modal-player">
-        <video src="${step.video}" controls autoplay playsinline preload="metadata"></video>
+        <video src="${videos[index]}" controls autoplay playsinline preload="metadata"></video>
       </div>
       <div class="video-modal-info">
         <h2 class="video-modal-title">${step.icon} ${step.title}</h2>
         ${step.group ? `<p class="video-modal-desc">${step.group}</p>` : ''}
+        ${videos.length > 1 ? `<p class="video-modal-desc">Vídeo ${index + 1} de ${videos.length}</p>` : ''}
       </div>
     </div>
   `;

@@ -86,12 +86,11 @@ export const manualModes = {
           step('m-motores-off', 'Desligar motores', '', { icon: '⏹️', group: EXT_ESQUERDO, noVideo: true }),
           step('m-escada', 'Montagem da escada de acesso', '', { icon: '🪜', group: INTERNA, video: vid('montar-desmontar-escada') }),
           step('m-cabos', 'Cabos Sala 1 e 2', '', { icon: '🔌', group: INTERNA, images: FOTOS_CABO, video: vid('colocar-remover-cabo-de-energia') }),
-          step('m-mangueiras', 'Mangueiras Sala 2', '', { icon: '🧵', group: INTERNA, images: FOTOS_MANGUEIRA }),
+          step('m-mangueiras', 'Mangueiras Sala 2', '', { icon: '🧵', group: INTERNA, images: FOTOS_MANGUEIRA, video: vid('mangueira-sala-2') }),
           step('m-parede', 'Acoplar teto do banheiro', '', { icon: '🚿', group: INTERNA, video: vid('teto-do-banheiro') }),
-          step('m-piso-esq', 'Montar pisos do lado esquerdo da sala do tomógrafo', '', { icon: '🧱', group: INTERNA }),
-          step('m-pisos2', 'Colocar pisos da Sala do Tomógrafo', '', { icon: '🧱', group: INTERNA, video: vid('colocar-pisos-sala-2') }),
+          step('m-pisos2', 'Acoplar pisos da sala do tomógrafo', '', { icon: '🧱', group: INTERNA, videos: [vid('pisos-sala-do-tomografo-1'), vid('colocar-pisos-sala-2')] }),
           step('m-penier', 'Montar Penier', '', { icon: '🏗️', group: INTERNA, video: vid('montar-penier'), warning: 'IMPORTANTE: a montagem e a desmontagem são obrigatoriamente feitas por duas pessoas.' }),
-          step('m-piso-dir', 'Montar pisos do lado direito da sala do tomógrafo', '', { icon: '🧱', group: INTERNA }),
+          step('m-piso-dir', 'Montar Pisos ao Lado do Penier', '', { icon: '🧱', group: INTERNA, noVideo: true }),
         ]
       },
       {
