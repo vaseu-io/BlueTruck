@@ -38,7 +38,7 @@ const motorSteps = (prefix, group, videos = {}) => [
     'Nível de óleo: se o indicador estiver amarelo, o nível está cheio; se estiver branco, está vazio.<br>' +
     'Voltímetro: deve estar em 100 VA. Acima disso o motor desliga sozinho.',
     { icon: '🛢️', group, video: videos.oleo }),
-  step(`${prefix}-ligar`, 'Motores: como ligar',
+  step(`${prefix}-ligar`, 'Motores: como ativar e desligar',
     '1. Pino 1 para trás<br>2. Pino 2 para frente<br>3. Pino 3 para trás<br>' +
     'Após posicionar os pinos corretamente, puxe a corda ou gire a chave.<br>' +
     '4. Quando o motor der partida, volte o Pino 2 para trás.',
@@ -95,7 +95,7 @@ export const manualModes = {
           step('m-alav4', 'Alavanca 4 — Abertura da sala do Tomógrafo',
             'Empurre a alavanca para a saída da porta.',
             { icon: '🕹️', group: EXT_DIREITO, video: vid('alavanca-4-abertura-sala-tomografo-direito') }),
-          step('m-alav5', 'Alavanca 5 — Abertura da sala 2',
+          step('m-alav5', 'Alavanca 5 — Sala do Tomógrafo',
             'Empurre a alavanca para a saída da porta.',
             { icon: '🕹️', group: EXT_ESQUERDO, video: vid('alavanca-5-abertura-sala-tomografo-esquerdo') }),
           step('m-motores-off', 'Desligar motores', '', { icon: '⏹️', group: EXT_ESQUERDO }),
@@ -103,7 +103,7 @@ export const manualModes = {
           step('m-cabos', 'Cabos Consultório 2 e Sala 2', '', { icon: '🔌', group: INTERNA, images: FOTOS_CABO, video: vid('colocar-remover-cabo-de-energia') }),
           step('m-mangueiras', 'Mangueiras Sala 2', '', { icon: '🧵', group: INTERNA, images: FOTOS_MANGUEIRA, video: vid('mangueira-sala-2') }),
           step('m-parede', 'Acoplar teto do banheiro', '', { icon: '🚿', group: INTERNA, video: vid('teto-do-banheiro') }),
-          step('m-pisos2', 'Acoplar pisos da sala do tomógrafo', '', { icon: '🧱', group: INTERNA, videos: [vid('pisos-sala-do-tomografo-1'), vid('colocar-pisos-sala-2')] }),
+          step('m-pisos2', 'Acoplar Pisos', '', { icon: '🧱', group: INTERNA, videos: [vid('pisos-sala-do-tomografo-1'), vid('colocar-pisos-sala-2')] }),
           step('m-penier', 'Montar Penier', '', { icon: '🏗️', group: INTERNA, video: vid('montar-penier'), warning: 'IMPORTANTE: a montagem e a desmontagem são obrigatoriamente feitas por duas pessoas.' }),
           step('m-piso-dir', 'Montar Pisos ao Lado do Penier', '', { icon: '🧱', group: INTERNA }),
         ]
