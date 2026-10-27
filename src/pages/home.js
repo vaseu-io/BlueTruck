@@ -1,26 +1,33 @@
+import * as THREE from 'three';
 import { Scene3D } from '../three/scene.js';
 import { createTruck } from '../three/truck.js';
 import { hotspotData } from '../data/tech-data.js';
 
 let scene3D = null;
 
+// Capacidade de exames por dia (horário comercial). Premissas — ajuste aqui se mudarem:
+//  - 8 horas úteis por dia
+//  - 20 min por exame de tomografia e 30 min por exame de ultrassom (incluem preparo e troca de paciente)
+//  - 1 tomógrafo e 1 sala de ultrassom funcionando ao mesmo tempo
+const HORAS_UTEIS = 8;
+const MINUTOS_TOMOGRAFIA = 20;
+const MINUTOS_ULTRASSOM = 30;
+const EXAMES_TOMOGRAFIA = Math.floor((HORAS_UTEIS * 60) / MINUTOS_TOMOGRAFIA);
+const EXAMES_ULTRASSOM = Math.floor((HORAS_UTEIS * 60) / MINUTOS_ULTRASSOM);
+const EXAMES_POR_DIA = EXAMES_TOMOGRAFIA + EXAMES_ULTRASSOM;
+
 export function renderHome(container, router) {
   container.innerHTML = `
     <div class="page">
       <div class="container">
         <!-- Hero -->
-        <section class="hero">
-          <div class="hero-badge">
-            <span class="pulse"></span>
-            Sistema de Manuseio Interativo
-          </div>
+        <section class="hero home-hero">
           <h1 class="hero-title">
-            Carreta com <span class="gradient-text">Tomógrafo</span><br>
-            Manual Interativo
+            <span class="gradient-text">BlueTruck</span><br>
+            <span class="hero-tagline"><span class="tagline-line">Tomografia e saúde</span> <span class="tagline-line">em todo lugar!</span></span>
           </h1>
           <p class="hero-subtitle">
-            Explore a carreta em 3D, acesse vídeo-aulas, manuais técnicos e plantas. 
-            Clique nos pontos iluminados para ver detalhes de cada componente.
+            A saúde está ficando cada vez mais acessível. A BlueTruck leva tomografia e consultório até onde você precisa.
           </p>
         </section>
 
@@ -28,7 +35,7 @@ export function renderHome(container, router) {
         <section class="viewer-section">
           <div class="viewer-container" id="viewer-3d">
             <div class="viewer-hint" id="viewer-hint">
-              🖱️ Arraste para rotacionar • Clique nos pontos para detalhes • Scroll para zoom
+              Arraste para rotacionar • Clique nas bolinhas pulsantes para ver cada item • Ctrl + scroll para zoom
             </div>
             <div class="viewer-controls">
               <button class="viewer-control-btn" id="btn-reset-camera" title="Resetar câmera">⟳</button>
@@ -53,20 +60,21 @@ export function renderHome(container, router) {
         <!-- Stats -->
         <div class="stats-bar">
           <div class="stat-item">
-            <div class="stat-value">84</div>
-            <div class="stat-label">kVA Gerador Externo (Diesel)</div>
+            <div class="stat-value">${EXAMES_POR_DIA}</div>
+            <div class="stat-label">Exames por dia</div>
+            <div class="stat-note">${EXAMES_TOMOGRAFIA} tomografia + ${EXAMES_ULTRASSOM} ultrassom · ${HORAS_UTEIS} h úteis</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">60</div>
-            <div class="stat-label">kVA Gerador Interno</div>
+            <div class="stat-value">1</div>
+            <div class="stat-label">Ultrassom</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">15 m</div>
-            <div class="stat-label">Comprimento Total</div>
+            <div class="stat-value">1</div>
+            <div class="stat-label">Tomografia</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">22</div>
-            <div class="stat-label">Circuitos no QD01</div>
+            <div class="stat-value">1</div>
+            <div class="stat-label">Banheiro</div>
           </div>
         </div>
 
@@ -75,11 +83,6 @@ export function renderHome(container, router) {
           <h2 class="section-title">Acesso Rápido</h2>
           <p class="section-subtitle">Navegue pelas seções do manual interativo</p>
           <div class="quick-cards">
-            <div class="quick-card" data-route="videos">
-              <div class="quick-card-icon">🎬</div>
-              <h3 class="quick-card-title">Vídeo-Aulas</h3>
-              <p class="quick-card-desc">9 vídeos de treinamento para ativação, operação e manutenção.</p>
-            </div>
             <div class="quick-card" data-route="manual">
               <div class="quick-card-icon">📘</div>
               <h3 class="quick-card-title">Manual</h3>
@@ -129,30 +132,22 @@ export function renderHome(container, router) {
     scene3D?.resetCamera();
   });
 
-  document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
-    if (scene3D) {
-      const dir = new (window.__THREE__ || THREE_MODULE).Vector3();
-      scene3D.camera.getWorldDirection(dir);
-      scene3D.camera.position.addScaledVector(dir, 2);
-    }
-  });
-
-  document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
-    if (scene3D) {
-      const dir = new (window.__THREE__ || THREE_MODULE).Vector3();
-      scene3D.camera.getWorldDirection(dir);
-      scene3D.camera.position.addScaledVector(dir, -2);
-    }
-  });
+  // Zoom pelos botões: aproxima/afasta da área em foco, respeitando os limites da câmera
+  const zoom = (fator) => {
+    if (!scene3D) return;
+    const { camera, controls } = scene3D;
+    const offset = camera.position.clone().sub(controls.target);
+    offset.setLength(THREE.MathUtils.clamp(offset.length() * fator, controls.minDistance, controls.maxDistance));
+    camera.position.copy(controls.target).add(offset);
+    scene3D.userMoved = true;
+  };
+  document.getElementById('btn-zoom-in')?.addEventListener('click', () => zoom(0.8));
+  document.getElementById('btn-zoom-out')?.addEventListener('click', () => zoom(1.25));
 }
-
-let THREE_MODULE;
 
 async function initScene(router) {
   const viewerEl = document.getElementById('viewer-3d');
   if (!viewerEl) return;
-
-  THREE_MODULE = await import('three');
 
   // Cleanup previous scene
   if (scene3D) {
@@ -171,7 +166,11 @@ async function initScene(router) {
   // Hotspot click handler
   scene3D.onHotspotClick = (data) => {
     showDetailPanel(data, router);
-    scene3D.focusOnPosition(data.position, 6);
+    // Vista própria de cada item (de frente); sem vista definida, aproxima por cima
+    scene3D.flyTo(data.camera || {
+      position: [data.position.x + 2, data.position.y + 2, data.position.z - 6],
+      target: [data.position.x, data.position.y, data.position.z],
+    });
   };
 
   // Close detail panel

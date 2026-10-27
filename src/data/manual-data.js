@@ -1,26 +1,28 @@
 // Passo a passo oficial (fonte: OneNote "Ativação/Desligamento")
 // Cada modo tem sua própria sequência de etapas na barra do manual.
 
+import { asset } from '../utils/asset.js';
+
 const step = (id, title, description, extra = {}) => ({ id, title, description, ...extra });
 
 // Vídeos do passo a passo (public/videos/passo-a-passo). Passos sem vídeo ficam sem botão.
-const VIDEO_ATIVACAO = '/videos/passo-a-passo/ativacao/';
+const VIDEO_ATIVACAO = asset('videos/passo-a-passo/ativacao/');
 const vid = (slug) => VIDEO_ATIVACAO + slug + '.mp4';
-const vidDes = (slug) => '/videos/passo-a-passo/desmontagem/' + slug + '.mp4';
+const vidDes = (slug) => asset('videos/passo-a-passo/desmontagem/' + slug + '.mp4');
 
 // Fotos de apoio (public/images/manual)
 const FOTOS_CABO = [
-  { src: '/images/manual/cabo.jpg', caption: 'Cabo' },
-  { src: '/images/manual/entrada-cabo.jpg', caption: 'Entrada do cabo' },
+  { src: asset('images/manual/cabo.jpg'), caption: 'Cabo' },
+  { src: asset('images/manual/entrada-cabo.jpg'), caption: 'Entrada do cabo' },
 ];
 const FOTOS_MANGUEIRA = [
-  { src: '/images/manual/mangueira.jpg', caption: 'Mangueira e engates' },
+  { src: asset('images/manual/mangueira.jpg'), caption: 'Mangueira e engates' },
 ];
 const FOTOS_TETO_BANHEIRO = [
-  { src: '/images/manual/teto-banheiro.jpg', caption: 'Teto do banheiro' },
+  { src: asset('images/manual/teto-banheiro.jpg'), caption: 'Teto do banheiro' },
 ];
 const FOTOS_PAREDE_BANHEIRO = [
-  { src: '/images/manual/parede-banheiro.jpg', caption: 'Parede do banheiro' },
+  { src: asset('images/manual/parede-banheiro.jpg'), caption: 'Parede do banheiro' },
 ];
 
 const EXT_DIREITO = 'Ativação Externa — Lado Direito';
@@ -48,6 +50,18 @@ const motorSteps = (prefix, group, videos = {}) => [
     }),
 ];
 
+// Módulo final (igual na Ativação e no Desligamento)
+const elevadorAcessibilidade = {
+  id: 'elevador',
+  title: 'Acessibilidade',
+  icon: '♿',
+  color: '#BF5AF2',
+  description: 'Elevador de acessibilidade da unidade.',
+  steps: [
+    step('el-montar', 'Como montar o elevador de acessibilidade?', '', { icon: '♿', video: vid('elevador-acessibilidade') }),
+  ]
+};
+
 export const manualModes = {
   activation: {
     label: 'Ativação',
@@ -66,7 +80,7 @@ export const manualModes = {
             'Após a confirmação do nivelamento, utilize o freio manual que está dentro do maleiro.',
             { icon: '🛞' }),
           ...motorSteps('m', 'Motores', { oleo: vid('nivel-de-oleo'), ligar: vid('ligar-motores') }),
-          step('m-suporte', 'Montar suporte da Sala 1 — Nivelar',
+          step('m-suporte', 'Montar suporte do Consultório 2 — Nivelar',
             'Deixe levemente inclinado contra o caminhão, para que em caso de chuva a água não escorra para dentro do caminhão.',
             { icon: '🏗️', group: EXT_DIREITO, video: vid('montar-suporte-sala-1') }),
           step('m-alav1', 'Alavanca 1 — Trava na porta',
@@ -86,7 +100,7 @@ export const manualModes = {
             { icon: '🕹️', group: EXT_ESQUERDO, video: vid('alavanca-5-abertura-sala-tomografo-esquerdo') }),
           step('m-motores-off', 'Desligar motores', '', { icon: '⏹️', group: EXT_ESQUERDO }),
           step('m-escada', 'Montagem da escada de acesso', '', { icon: '🪜', group: INTERNA, video: vid('montar-desmontar-escada') }),
-          step('m-cabos', 'Cabos Sala 1 e 2', '', { icon: '🔌', group: INTERNA, images: FOTOS_CABO, video: vid('colocar-remover-cabo-de-energia') }),
+          step('m-cabos', 'Cabos Consultório 2 e Sala 2', '', { icon: '🔌', group: INTERNA, images: FOTOS_CABO, video: vid('colocar-remover-cabo-de-energia') }),
           step('m-mangueiras', 'Mangueiras Sala 2', '', { icon: '🧵', group: INTERNA, images: FOTOS_MANGUEIRA, video: vid('mangueira-sala-2') }),
           step('m-parede', 'Acoplar teto do banheiro', '', { icon: '🚿', group: INTERNA, video: vid('teto-do-banheiro') }),
           step('m-pisos2', 'Acoplar pisos da sala do tomógrafo', '', { icon: '🧱', group: INTERNA, videos: [vid('pisos-sala-do-tomografo-1'), vid('colocar-pisos-sala-2')] }),
@@ -127,7 +141,8 @@ export const manualModes = {
           step('me-qdf-int', 'Ligar QDF interno', '', { icon: '🎛️', video: vid('qdf-interno') }),
           step('me-qdf-tomo', 'Ligar QDF do Tomógrafo', '', { icon: '🎛️', video: vid('qdf-sala-do-tomografo') }),
         ]
-      }
+      },
+      elevadorAcessibilidade
     ]
   },
 
@@ -141,21 +156,21 @@ export const manualModes = {
         color: '#0A84FF',
         description: 'Desmontagem interna, ligação dos motores e recolhimento das salas.',
         steps: [
-          step('d-cabo1', 'Remover cabo da Sala 1', '', { icon: '🔌', group: DES_INTERNA, images: FOTOS_CABO, video: vid('colocar-remover-cabo-de-energia') }),
+          step('d-cabo1', 'Remover cabo do Consultório 2', '', { icon: '🔌', group: DES_INTERNA, images: FOTOS_CABO, video: vid('colocar-remover-cabo-de-energia') }),
           step('d-cabo-tomo', 'Remover cabo da Sala do Tomógrafo', '', { icon: '🔌', group: DES_INTERNA, images: FOTOS_CABO, video: vid('colocar-remover-cabo-de-energia') }),
           step('d-mangueira', 'Remover mangueira da Sala do Tomógrafo', '', { icon: '🧵', group: DES_INTERNA, images: FOTOS_MANGUEIRA }),
           step('d-teto-banheiro', 'Desacoplar teto do banheiro', '', { icon: '🚿', group: DES_INTERNA, images: FOTOS_TETO_BANHEIRO }),
-          step('d-parede-banheiro', 'Posicionar parede do banheiro para fechamento da sala', '', { icon: '🚿', group: DES_INTERNA, images: FOTOS_PAREDE_BANHEIRO, video: '/videos/passo-a-passo/ativacao/parede-do-banheiro.mp4' }),
+          step('d-parede-banheiro', 'Posicionar parede do banheiro para fechamento da sala', '', { icon: '🚿', group: DES_INTERNA, images: FOTOS_PAREDE_BANHEIRO, video: vid('parede-do-banheiro') }),
           step('d-pisos-chao', 'Remover pisos do chão da Sala do Tomógrafo', '', { icon: '🧱', group: DES_INTERNA, video: vid('pisos-sala-do-tomografo-1') }),
           step('d-pisos-acoplar', 'Desacoplar pisos da sala do Tomógrafo', '', { icon: '🧱', group: DES_INTERNA, video: vidDes('desacoplar-pisos') }),
           step('d-penier', 'Desligar Penier', '', { icon: '🏗️', group: DES_INTERNA, video: vidDes('desligar-penier'), warning: 'IMPORTANTE: a montagem e a desmontagem são obrigatoriamente feitas por duas pessoas.' }),
-          step('d-mover', 'Mover todos os itens da Sala 1 para o Consultório 1', '', { icon: '📦', group: DES_INTERNA }),
+          step('d-mover', 'Mover todos os itens do Consultório 2 para o Consultório 1', '', { icon: '📦', group: DES_INTERNA }),
           step('d-trilhos', 'Limpar trilhos', '', { icon: '🧹', group: DES_INTERNA }),
           ...motorSteps('d', 'Após a confirmação do nivelamento do caminhão', { oleo: vid('nivel-de-oleo') }),
           step('d-alav5', 'Alavanca 5 — Fechar sala 2',
             'Puxe a alavanca para o fechamento da porta.',
             { icon: '🕹️', group: DES_ESQUERDO, video: vid('alavanca-5-abertura-sala-tomografo-esquerdo') }),
-          step('d-alav3', 'Alavanca 3 — Recolher Sala 01',
+          step('d-alav3', 'Alavanca 3 — Recolher Consultório 2',
             'Puxe a alavanca para recolher a sala.',
             { icon: '🕹️', group: DES_DIREITO, video: vid('alavanca-3-liberar-do-consultorio') }),
           step('d-alav4', 'Alavanca 4 — Recolher sala do Tomógrafo',
@@ -201,7 +216,8 @@ export const manualModes = {
           step('dh-dejetos', 'Remover dejetos e água suja', '', { icon: '🚰' }),
           step('dh-checklist', 'Conferir itens do maleiro no checklist', '', { icon: '✅' }),
         ]
-      }
+      },
+      elevadorAcessibilidade
     ]
   }
 };

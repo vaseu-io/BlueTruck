@@ -6,6 +6,9 @@ import { renderVideos } from './pages/videos.js';
 import { renderManual } from './pages/manual.js';
 import { renderTechInfo } from './pages/techinfo.js';
 import { renderPlants } from './pages/plants.js';
+import { exigirSenha } from './components/gate.js';
+
+function iniciar() {
 
 const app = document.querySelector('#app');
 app.innerHTML = '';
@@ -66,3 +69,6 @@ setupNavbar(router);
 
 // Init router to render initial page
 router.init();
+}
+
+exigirSenha(iniciar);

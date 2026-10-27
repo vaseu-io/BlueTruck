@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { asset } from '../utils/asset.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
@@ -90,7 +91,7 @@ export async function createTruck(scene) {
   const truckGroup = new THREE.Group();
   
   try {
-    const gltf = await loader.loadAsync('/models/PE- 15741-R00.glb');
+    const gltf = await loader.loadAsync(asset('models/PE- 15741-R00.glb'));
     const model = gltf.scene;
     
     // Melhorar visualização de materiais e sombras

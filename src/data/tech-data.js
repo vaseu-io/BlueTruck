@@ -5,9 +5,11 @@
 //  QD01 / Entrada 1 e 2 = diagramas unifilares
 // Só entram aqui informações que constam nesses documentos.
 
+import { asset } from '../utils/asset.js';
+
 const pdf = (label, file) => ({
   label,
-  value: `<a href="/docs/${file}" target="_blank" class="download-link">Baixar PDF</a>`
+  value: `<a href="${asset('docs/' + file)}" target="_blank" class="download-link">Baixar PDF</a>`
 });
 
 export const techSpecs = {
@@ -102,8 +104,11 @@ export const hotspotData = [
   {
     id: 'gerador',
     name: 'Geradores (84 kVA externo / 60 kVA interno)',
+    label: 'Geradores',
+    labelBelow: true,
+    camera: { position: [-12.5, 2.8, 5.2], target: [-7.8, 1.9, 1.2] },
     description: 'Gerador externo diesel de 84 kVA (Generac PWY65) e gerador interno de 60 kVA, usado quando a unidade é ligada na tomada.',
-    position: { x: -6.5, y: 1.5, z: 0 },
+    position: { x: -7.45, y: 2.2, z: 1.1 },
     color: '#FFD60A',
     specs: [
       { label: 'Externo', value: 'Generac PWY65 · 84 kVA · diesel' },
@@ -116,6 +121,8 @@ export const hotspotData = [
   {
     id: 'painel',
     name: 'Quadros Elétricos (QD01 / QD02)',
+    label: 'Quadros elétricos',
+    camera: { position: [0.5, 2.7, -8.8], target: [0, 2, -1] },
     description: 'QD01 distribui a energia da unidade em 22 circuitos; o QD02 alimenta o tomógrafo.',
     position: { x: 0, y: 2.0, z: -1.3 }, // Inside command area
     color: '#FF6B35',
@@ -130,8 +137,10 @@ export const hotspotData = [
   {
     id: 'climatizacao',
     name: 'Ar-condicionado',
+    label: 'Ar-condicionado',
+    camera: { position: [-11.8, 4.9, 4.4], target: [-6.9, 3.8, 1.1] },
     description: 'Quatro aparelhos split inverter LG: dois cassetes de 36.000 BTU e dois Hi-Wall de 12.000 e 9.000 BTU.',
-    position: { x: 0, y: 4.2, z: 0 },
+    position: { x: -6.9, y: 4.0, z: 1.1 },
     color: '#5AC8FA',
     specs: [
       { label: 'Cassete', value: '2 × 36.000 BTU' },

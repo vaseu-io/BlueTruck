@@ -18,6 +18,8 @@ export class Scene3D {
     this.animationId = null;
     this.clock = new THREE.Clock();
     this.hoveredHotspot = null;
+    this.fly = null;
+    this.userMoved = false;
 
     this.init();
   }
@@ -30,9 +32,8 @@ export class Scene3D {
     // Camera
     const aspect = this.container.clientWidth / this.container.clientHeight;
     this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
-    // Visão lateral do caminhão mostrando a entrada (lado oposto)
+    // Posição inicial provisória; o enquadramento real vem de getHomeView()
     this.camera.position.set(0, 4, -20);
-    this.camera.lookAt(0, 1.5, 0);
 
     // Renderer
     this.renderer = new THREE.WebGLRenderer({
@@ -54,10 +55,17 @@ export class Scene3D {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
-    this.controls.minDistance = 8;
+    this.controls.minDistance = 3;
     this.controls.maxDistance = 30;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.01; // Não deixa ir pra debaixo da terra
     this.controls.target.set(0, 1.5, 0);
+
+    // Enquadra a carreta inteira e perto; qualquer arrasto do usuário cancela animações
+    this.applyView(this.getHomeView());
+    this.controls.addEventListener('start', () => {
+      this.userMoved = true;
+      this.fly = null;
+    });
 
     // Não prender a rolagem da página: a roda só dá zoom com Ctrl/⌘ e,
     // no toque, o arrasto vertical continua rolando a página
@@ -146,47 +154,141 @@ export class Scene3D {
     this.scene.add(grid);
   }
 
-  addHotspot(data, mesh) {
-    // Create hotspot sprite
+  // ----- Câmera -----
+
+  // Enquadramento inicial: a carreta ocupa a largura da área, em qualquer proporção de tela
+  getHomeView() {
+    const fov = THREE.MathUtils.degToRad(this.camera.fov);
+    // Em telas estreitas (celular) corta um pouco as pontas para a carreta aparecer maior
+    const comprimento = this.camera.aspect < 1.3 ? 19.5 : 22;
+    const distLargura = (comprimento / 2) / (Math.tan(fov / 2) * this.camera.aspect);
+    const distAltura = 3.4 / Math.tan(fov / 2);
+    const d = THREE.MathUtils.clamp(Math.max(distLargura, distAltura), 9, 28);
+    return { position: [0, 2.6 + d * 0.12, -d], target: [0, 1.9, 0] };
+  }
+
+  applyView(view) {
+    this.camera.position.set(...view.position);
+    this.controls.target.set(...view.target);
+    this.controls.update();
+  }
+
+  // Voo suave até uma vista { position: [x,y,z], target: [x,y,z] }
+  flyTo(view, duration = 1100) {
+    this.fly = {
+      t0: performance.now(),
+      duration,
+      p0: this.camera.position.clone(),
+      p1: new THREE.Vector3(...view.position),
+      g0: this.controls.target.clone(),
+      g1: new THREE.Vector3(...view.target),
+    };
+  }
+
+  resetCamera() {
+    this.userMoved = false;
+    this.flyTo(this.getHomeView());
+  }
+
+  // ----- Pontos clicáveis -----
+
+  makeDotTexture(color) {
+    const size = 128;
     const canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 64;
+    canvas.width = canvas.height = size;
     const ctx = canvas.getContext('2d');
+    const c = size / 2;
 
-    // Outer glow
-    const gradient = ctx.createRadialGradient(32, 32, 8, 32, 32, 32);
-    gradient.addColorStop(0, data.color + 'CC');
-    gradient.addColorStop(0.5, data.color + '44');
-    gradient.addColorStop(1, data.color + '00');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 64, 64);
+    const glow = ctx.createRadialGradient(c, c, 14, c, c, c);
+    glow.addColorStop(0, color + '99');
+    glow.addColorStop(1, color + '00');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, size, size);
 
-    // Inner circle
     ctx.beginPath();
-    ctx.arc(32, 32, 10, 0, Math.PI * 2);
-    ctx.fillStyle = data.color;
+    ctx.arc(c, c, 26, 0, Math.PI * 2);
+    ctx.fillStyle = color;
     ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
 
-    // White center
     ctx.beginPath();
-    ctx.arc(32, 32, 4, 0, Math.PI * 2);
+    ctx.arc(c, c, 9, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
     ctx.fill();
 
-    const texture = new THREE.CanvasTexture(canvas);
-    const spriteMat = new THREE.SpriteMaterial({
-      map: texture,
-      transparent: true,
-      depthTest: false,
-    });
-    const sprite = new THREE.Sprite(spriteMat);
-    sprite.position.copy(new THREE.Vector3(data.position.x, data.position.y, data.position.z));
-    sprite.scale.set(1.5, 1.5, 1.5);
-    sprite.userData = { hotspotData: data, type: 'hotspot' };
-    this.scene.add(sprite);
+    return new THREE.CanvasTexture(canvas);
+  }
 
-    this.hotspotMeshes.push(sprite);
-    this.hotspots.push({ sprite, data, mesh });
+  makeRingTexture(color) {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, 54, 0, Math.PI * 2);
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  makeLabelTexture(text, color) {
+    const h = 96;
+    const measure = document.createElement('canvas').getContext('2d');
+    measure.font = '700 44px Inter, "Segoe UI", sans-serif';
+    const w = Math.ceil(measure.measureText(text).width) + 72;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(10, 14, 26, 0.94)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 10, h);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = color;
+    ctx.strokeRect(1.5, 1.5, w - 3, h - 3);
+    ctx.font = '700 44px Inter, "Segoe UI", sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 36, h / 2 + 2);
+
+    return { texture: new THREE.CanvasTexture(canvas), aspect: w / h };
+  }
+
+  addHotspot(data) {
+    const pos = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
+    const material = (map) => new THREE.SpriteMaterial({ map, transparent: true, depthTest: false, depthWrite: false });
+
+    const dot = new THREE.Sprite(material(this.makeDotTexture(data.color)));
+    const ring = new THREE.Sprite(material(this.makeRingTexture(data.color)));
+    const labelTex = this.makeLabelTexture(data.label || data.name, data.color);
+    const label = new THREE.Sprite(material(labelTex.texture));
+
+    dot.position.copy(pos);
+    ring.position.copy(pos);
+    label.position.copy(pos);
+    dot.renderOrder = 10;
+    ring.renderOrder = 9;
+    label.renderOrder = 11;
+
+    const hotspot = { data, dot, ring, label, labelAspect: labelTex.aspect, hover: 0 };
+    [dot, label].forEach((sprite) => {
+      sprite.userData = { hotspotData: data, type: 'hotspot', hotspot };
+      this.hotspotMeshes.push(sprite);
+    });
+
+    this.scene.add(ring, dot, label);
+    this.hotspots.push(hotspot);
+  }
+
+  hotspotUnderPointer() {
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    const hit = this.raycaster.intersectObjects(this.hotspotMeshes)[0];
+    return hit ? hit.object.userData.hotspot : null;
   }
 
   onMouseMove(event) {
@@ -194,39 +296,18 @@ export class Scene3D {
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-    // Raycasting for hotspots
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObjects(this.hotspotMeshes);
-
-    if (intersects.length > 0) {
-      const hotspot = intersects[0].object;
-      if (this.hoveredHotspot !== hotspot) {
-        // Reset previous
-        if (this.hoveredHotspot) {
-          this.hoveredHotspot.scale.set(1.5, 1.5, 1.5);
-        }
-        this.hoveredHotspot = hotspot;
-        hotspot.scale.set(2, 2, 2);
-        this.container.style.cursor = 'pointer';
-      }
-    } else {
-      if (this.hoveredHotspot) {
-        this.hoveredHotspot.scale.set(1.5, 1.5, 1.5);
-        this.hoveredHotspot = null;
-        this.container.style.cursor = 'grab';
-      }
-    }
+    this.hoveredHotspot = this.hotspotUnderPointer();
+    this.container.style.cursor = this.hoveredHotspot ? 'pointer' : 'grab';
   }
 
   onClick(event) {
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObjects(this.hotspotMeshes);
+    const rect = this.container.getBoundingClientRect();
+    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-    if (intersects.length > 0) {
-      const hotspotData = intersects[0].object.userData.hotspotData;
-      if (this.onHotspotClick) {
-        this.onHotspotClick(hotspotData);
-      }
+    const hotspot = this.hotspotUnderPointer();
+    if (hotspot && this.onHotspotClick) {
+      this.onHotspotClick(hotspot.data);
     }
   }
 
@@ -235,6 +316,7 @@ export class Scene3D {
     this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    if (!this.userMoved && !this.fly) this.applyView(this.getHomeView());
   }
 
   animate() {
@@ -242,66 +324,39 @@ export class Scene3D {
 
     const time = this.clock.getElapsedTime();
 
-    // Animate hotspot sprites
-    this.hotspotMeshes.forEach((sprite, i) => {
-      const scale = 1.5 + Math.sin(time * 2 + i * 0.8) * 0.15;
-      if (sprite !== this.hoveredHotspot) {
-        sprite.scale.set(scale, scale, scale);
-      }
-      sprite.material.opacity = 0.7 + Math.sin(time * 3 + i) * 0.3;
+    // Voo de câmera
+    if (this.fly) {
+      const u = Math.min((performance.now() - this.fly.t0) / this.fly.duration, 1);
+      const e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+      this.camera.position.lerpVectors(this.fly.p0, this.fly.p1, e);
+      this.controls.target.lerpVectors(this.fly.g0, this.fly.g1, e);
+      if (u >= 1) this.fly = null;
+    }
+
+    // Pontos clicáveis: pulsam, com anel que se expande, e mantêm tamanho legível à distância
+    const dist = this.camera.position.distanceTo(this.controls.target);
+    const k = THREE.MathUtils.clamp(dist / 14, 0.5, 1.6);
+    this.hotspots.forEach((h, i) => {
+      const target = h === this.hoveredHotspot ? 1 : 0;
+      h.hover += (target - h.hover) * 0.2;
+
+      const beat = 1 + Math.sin(time * 4 + i) * 0.07;
+      const size = 1.15 * k * beat * (1 + h.hover * 0.35);
+      h.dot.scale.set(size, size, 1);
+
+      const phase = (time * 0.9 + i * 0.33) % 1;
+      const ringSize = 1.15 * k * (1 + phase * 1.9);
+      h.ring.scale.set(ringSize, ringSize, 1);
+      h.ring.material.opacity = (1 - phase) * 0.85;
+
+      const labelH = 0.5 * k * (1 + h.hover * 0.12);
+      h.label.scale.set(labelH * h.labelAspect, labelH, 1);
+      const lado = h.data.labelBelow ? -1 : 1;
+      h.label.position.set(h.data.position.x, h.data.position.y + lado * 0.95 * k, h.data.position.z);
     });
 
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
-  }
-
-  focusOnPosition(position, distance = 6) {
-    const targetPos = new THREE.Vector3(position.x, position.y, position.z);
-    const cameraTarget = targetPos.clone().add(new THREE.Vector3(distance, distance * 0.5, distance));
-
-    // Smooth camera transition
-    const startPos = this.camera.position.clone();
-    const startTarget = this.controls.target.clone();
-    let progress = 0;
-
-    const animateCamera = () => {
-      progress += 0.02;
-      if (progress >= 1) {
-        this.camera.position.copy(cameraTarget);
-        this.controls.target.copy(targetPos);
-        return;
-      }
-
-      const eased = 1 - Math.pow(1 - progress, 3);
-      this.camera.position.lerpVectors(startPos, cameraTarget, eased);
-      this.controls.target.lerpVectors(startTarget, targetPos, eased);
-      requestAnimationFrame(animateCamera);
-    };
-    animateCamera();
-  }
-
-  resetCamera() {
-    const cameraTarget = new THREE.Vector3(0, 4, -20);
-    const targetPos = new THREE.Vector3(0, 1.5, 0);
-
-    const startPos = this.camera.position.clone();
-    const startTarget = this.controls.target.clone();
-    let progress = 0;
-
-    const animateCamera = () => {
-      progress += 0.02;
-      if (progress >= 1) {
-        this.camera.position.copy(cameraTarget);
-        this.controls.target.copy(targetPos);
-        return;
-      }
-
-      const eased = 1 - Math.pow(1 - progress, 3);
-      this.camera.position.lerpVectors(startPos, cameraTarget, eased);
-      this.controls.target.lerpVectors(startTarget, targetPos, eased);
-      requestAnimationFrame(animateCamera);
-    };
-    animateCamera();
   }
 
   destroy() {

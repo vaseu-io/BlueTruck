@@ -1,3 +1,5 @@
+import { asset } from '../utils/asset.js';
+
 let currentPlant = 'layout';
 let canvasState = { scale: 1, offsetX: 0, offsetY: 0, isDragging: false, startX: 0, startY: 0 };
 let resizeBound = false;
@@ -239,9 +241,9 @@ function drawPlant(type) {
   const downloadLink = document.getElementById('plant-download');
   if (downloadLink) {
     if (type === 'layout') {
-      downloadLink.href = '/docs/PE -15741-R00.pdf';
+      downloadLink.href = asset('docs/PE -15741-R00.pdf');
     } else if (type === 'eletrica') {
-      downloadLink.href = '/docs/Diagramas-BLUE_HEALTH QD01.pdf';
+      downloadLink.href = asset('docs/Diagramas-BLUE_HEALTH QD01.pdf');
     }
   }
 

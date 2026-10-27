@@ -18,7 +18,7 @@ export function renderManual(container) {
   container.innerHTML = `
     <div class="page manual-page">
       <div class="container">
-        <section class="hero" style="padding-bottom: var(--space-lg);">
+        <section class="hero manual-hero" style="padding-bottom: var(--space-lg);">
           <div class="hero-badge">
             <span class="pulse"></span>
             Procedimentos Operacionais
